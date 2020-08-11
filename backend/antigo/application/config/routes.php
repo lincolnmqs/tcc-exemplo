@@ -50,7 +50,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |		my-controller/my-method	-> my_controller/my_method
 */
 
-$rotas = array('produtos');
+$rotas = array('avaliadores');
 
 foreach($rotas as $value){
 	$route[$value]['get']          	            = $value;

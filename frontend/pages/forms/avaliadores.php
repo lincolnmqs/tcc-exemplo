@@ -2,7 +2,7 @@
 
 require('base.php');
 
-$frontend = new Base('avaliadores', 'Avaliadores', [
+$camposInputs = [
   [
     'cpf_avaliadores', 
     'string', 
@@ -18,4 +18,6 @@ $frontend = new Base('avaliadores', 'Avaliadores', [
     'date', 
     'Data de Retorno'
   ]
-]);
+];
+
+$frontend = new Base('avaliadores', 'Avaliadores', $camposInputs); // nome da tabela, nome do crud, campos definidos do input

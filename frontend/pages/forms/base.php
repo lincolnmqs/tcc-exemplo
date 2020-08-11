@@ -2,7 +2,9 @@
   class Base {
 
     public function __construct($nomeDaTabela, $nomeCrud, $valorInputs){
-    ?> 
+      
+    $url = "http://localhost:9000/tcc/api/" . $nomeDaTabela;
+?> 
 
 <!DOCTYPE html>
 <html>
@@ -21,35 +23,20 @@
   <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  
+  <style>
+    .fa-trash-alt {
+      color: red;
+    }
+    .table {
+      text-align: center;
+    }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="../../index3.html" class="nav-link">Home</a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Contact</a>
-      </li>
-    </ul>
-
-    <!-- SEARCH FORM -->
-    <form class="form-inline ml-3">
-      <div class="input-group input-group-sm">
-        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-        <div class="input-group-append">
-          <button class="btn btn-navbar" type="submit">
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
-      </div>
-    </form>
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
@@ -174,7 +161,7 @@
       <div class="container-fluid">
         <div class="row">
           <!-- left column -->
-          <div class="col-md-6">
+          <div class="col-md-12">
             <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
@@ -182,18 +169,27 @@
               </div>
               <!-- /.card-header -->
               <!-- form start -->
-              <form role="form">
+              <form role="form" id="<?php echo "form-" . $nomeDaTabela; ?>">
                 <div class="card-body">
                   <?php 
                     $count = count($valorInputs);
               
-                    for($i=0; $i<$count; $i++){  
-                      if($valorInputs[$i][1] == 'string'){
+                    for($i=0; $i<$count; $i++){                       
+                      if($valorInputs[$i][1] == 'password'){
                       ?> 
                         
                         <div class="form-group">
                           <label for="<?php echo $valorInputs[$i][0]; ?>"><?php echo $valorInputs[$i][2]; ?></label>
-                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" placeholder="<?php echo $valorInputs[$i][2]; ?>">
+                          <input type="password" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" name="<?php echo $valorInputs[$i][0]; ?>" placeholder="<?php echo $valorInputs[$i][2]; ?>">
+                        </div>
+                        
+                      <?php   
+                      } else if($valorInputs[$i][1] == 'string'){
+                      ?> 
+                        
+                        <div class="form-group">
+                          <label for="<?php echo $valorInputs[$i][0]; ?>"><?php echo $valorInputs[$i][2]; ?></label>
+                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" name="<?php echo $valorInputs[$i][0]; ?>" placeholder="<?php echo $valorInputs[$i][2]; ?>">
                         </div>
                         
                       <?php   
@@ -202,7 +198,7 @@
                         
                         <div class="form-group">
                           <label for="<?php echo $valorInputs[$i][0]; ?>"><?php echo $valorInputs[$i][2]; ?></label>
-                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>">
+                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" name="<?php echo $valorInputs[$i][0]; ?>">
                         </div>
                         
                       <?php   
@@ -213,11 +209,80 @@
                 <!-- /.card-body -->
 
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-primary">Gravar</button>
+                  <div onclick="postAPI()" class="btn btn-primary">Gravar</div>
                 </div>
               </form>
             </div>
             <!-- /.card -->
+            
+            <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Lista de <?php echo $nomeCrud; ?></h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <table id="<?php echo "table-" . $nomeDaTabela; ?>" class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <?php
+                      $count = count($valorInputs);
+
+                      for($i=0; $i<$count; $i++){ 
+                    ?>
+                    <th><?php echo $valorInputs[$i][2]; ?></th>
+                    <?php
+                     }
+                  ?>
+                    <th>Opções</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                  <?php
+                    $resultado = json_decode(file_get_contents($url));
+
+                    $count = count($resultado);
+              
+                    for($i=0; $i<$count; $i++){ 
+                      $newArray = get_object_vars($resultado[$i]);
+                    ?>
+                    <tr>
+                    <?php
+                      $countAux = count($valorInputs);
+              
+                      for($j=0; $j<$countAux; $j++){ 
+                  ?>
+                        <td><?php echo $newArray[$valorInputs[$j][0]]; ?></td>
+                  <?php
+                      }
+                  ?>
+                      <td>
+                        <i class="nav-icon fas fa-trash-alt" onclick="deleteAPI(<?php echo $newArray['id_' . $nomeDaTabela]; ?>)"></i>
+                      </td>
+                    </tr>
+                  <?php
+                    }
+                  ?>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <?php
+                      $count = count($valorInputs);
+
+                      for($i=0; $i<$count; $i++){ 
+                    ?>
+                    <th><?php echo $valorInputs[$i][2]; ?></th>
+                    <?php
+                     }
+                  ?>
+                    <th>Opções</th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
 
           </div>
           <!--/.col (left) -->
@@ -242,6 +307,83 @@
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
+<script>
+  async function postAPI(){
+    let nomeInput, dadosInput;
+    let valuesCreate = {};
+    
+    <?php
+      $count = count($valorInputs);
+
+         for($i=0; $i<$count; $i++){ 
+    ?>
+    
+            nomeInput = "<?php echo $valorInputs[$i][0]; ?>";
+
+            dadosInput = document.querySelector(`#${nomeInput}`).value;
+    
+            if(!dadosInput){
+              alert('Campo <?php echo $valorInputs[$i][0]; ?> vazio!');
+              return;
+            }
+            
+            valuesCreate[nomeInput] = dadosInput;
+    <?php 
+           
+         }
+    ?>     
+    
+      console.log(valuesCreate);
+    
+      const valor = await create_api(valuesCreate);
+    
+      alert('Valor criado!');
+  }
+  
+  async function deleteAPI(id){
+    await delete_api(id);
+    
+    alert('Valor excluído!');
+  }
+  
+  function create_api(dadosParaCadastro) {
+    return new Promise(async (next, reject) => {
+      const body = JSON.stringify(dadosParaCadastro);
+
+      try {
+        const chamada = await fetch('<?php echo $url; ?>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body
+        });
+
+        const dados = await chamada.json();
+
+        next(dados);
+      } catch(erro) {
+        console.log(erro);
+      }
+    });
+  }
+  
+  function delete_api(id) {
+    return new Promise(async (next, reject) => {
+      try {
+        const chamada = await fetch(`<?php echo $url; ?>/${id}`, {
+          method: 'DELETE'
+        });
+
+        const dados = await chamada.json();
+
+        next();
+      } catch(erro) {
+        console.log(erro);
+      }
+    });
+  }
+</script>
 
 <!-- jQuery -->
 <script src="../../plugins/jquery/jquery.min.js"></script>
@@ -249,6 +391,11 @@
 <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- bs-custom-file-input -->
 <script src="../../plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<!-- DataTables -->
+<script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
 <!-- AdminLTE App -->
 <script src="../../dist/js/adminlte.min.js"></script>
 <!-- AdminLTE for demo purposes -->
@@ -261,7 +408,7 @@ $(document).ready(function () {
 </body>
 </html>
 
-    <?php
+<?php
     }
   }
 ?>
