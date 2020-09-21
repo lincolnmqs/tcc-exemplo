@@ -3,7 +3,7 @@
 
     public function __construct($nomeDaTabela, $nomeCrud, $valorInputs){
       
-    $url = "http://localhost:9000/tcc/api/" . $nomeDaTabela;
+    $url = "http://localhost:8000/api/" . $nomeDaTabela;
 ?> 
 
 <!DOCTYPE html>
@@ -172,33 +172,34 @@
               <form role="form" id="<?php echo "form-" . $nomeDaTabela; ?>">
                 <div class="card-body">
                   <?php 
+
                     $count = count($valorInputs);
               
                     for($i=0; $i<$count; $i++){                       
-                      if($valorInputs[$i][1] == 'password'){
+                      if($valorInputs[$i]['tipo'] == 'password'){
                       ?> 
                         
                         <div class="form-group">
-                          <label for="<?php echo $valorInputs[$i][0]; ?>"><?php echo $valorInputs[$i][2]; ?></label>
-                          <input type="password" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" name="<?php echo $valorInputs[$i][0]; ?>" placeholder="<?php echo $valorInputs[$i][2]; ?>">
+                          <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="password" class="form-control" id="<?php echo $valorInputs[$i]['campo']; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
                         </div>
                         
                       <?php   
-                      } else if($valorInputs[$i][1] == 'string'){
+                      } else if($valorInputs[$i]['tipo'] == 'string'){
                       ?> 
                         
                         <div class="form-group">
-                          <label for="<?php echo $valorInputs[$i][0]; ?>"><?php echo $valorInputs[$i][2]; ?></label>
-                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" name="<?php echo $valorInputs[$i][0]; ?>" placeholder="<?php echo $valorInputs[$i][2]; ?>">
+                          <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i]['campo']; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
                         </div>
                         
                       <?php   
-                      } else if($valorInputs[$i][1] == 'date'){
+                      } else if($valorInputs[$i]['tipo'] == 'date'){
                       ?>  
                         
                         <div class="form-group">
-                          <label for="<?php echo $valorInputs[$i][0]; ?>"><?php echo $valorInputs[$i][2]; ?></label>
-                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i][0]; ?>" name="<?php echo $valorInputs[$i][0]; ?>">
+                          <label for="<?php echo $valorInputs[$i]['titulo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i]['campo']; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>">
                         </div>
                         
                       <?php   
@@ -228,9 +229,11 @@
                       $count = count($valorInputs);
 
                       for($i=0; $i<$count; $i++){ 
+                        if($valorInputs[$i]['visualizar']){
                     ?>
-                    <th><?php echo $valorInputs[$i][2]; ?></th>
+                    <th><?php echo $valorInputs[$i]['titulo']; ?></th>
                     <?php
+                        }
                      }
                   ?>
                     <th>Opções</th>
@@ -251,9 +254,11 @@
                       $countAux = count($valorInputs);
               
                       for($j=0; $j<$countAux; $j++){ 
+                        if($valorInputs[$j]['visualizar']){
                   ?>
-                        <td><?php echo $newArray[$valorInputs[$j][0]]; ?></td>
+                        <td><?php echo $newArray[$valorInputs[$j]['campo']]; ?></td>
                   <?php
+                        }
                       }
                   ?>
                       <td>
@@ -270,9 +275,11 @@
                       $count = count($valorInputs);
 
                       for($i=0; $i<$count; $i++){ 
+                        if($valorInputs[$i]['visualizar']){
                     ?>
-                    <th><?php echo $valorInputs[$i][2]; ?></th>
+                    <th><?php echo $valorInputs[$i]['titulo']; ?></th>
                     <?php
+                        }
                      }
                   ?>
                     <th>Opções</th>
@@ -318,12 +325,12 @@
          for($i=0; $i<$count; $i++){ 
     ?>
     
-            nomeInput = "<?php echo $valorInputs[$i][0]; ?>";
+            nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
 
             dadosInput = document.querySelector(`#${nomeInput}`).value;
     
             if(!dadosInput){
-              alert('Campo <?php echo $valorInputs[$i][0]; ?> vazio!');
+              alert('Campo <?php echo $valorInputs[$i]['campo']; ?> vazio!');
               return;
             }
             

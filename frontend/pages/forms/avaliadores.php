@@ -2,22 +2,27 @@
 
 require('base.php');
 
+$nomeDaTabela = 'avaliadores';
+$nomeCrud = 'Avaliadores';
 $camposInputs = [
   [
-    'cpf_avaliadores', 
-    'string', 
-    'CPF'
+    'campo'      => 'cpf_avaliadores', 
+    'tipo'       => 'string', 
+    'titulo'     => 'CPF',
+    'visualizar' => true
   ], 
   [
-    'data_envio_avaliadores', 
-    'date', 
-    'Data de Envio'
+    'campo'      => 'data_envio_avaliadores', 
+    'tipo'       => 'date', 
+    'titulo'     => 'Data de Envio',
+    'visualizar' => true
   ], 
   [
-    'data_retorno_avaliadores', 
-    'date', 
-    'Data de Retorno'
+    'campo'      => 'data_retorno_avaliadores', 
+    'tipo'       => 'date', 
+    'titulo'     => 'Data de Retorno',
+    'visualizar' => true
   ]
 ];
 
-$frontend = new Base('avaliadores', 'Avaliadores', $camposInputs); // nome da tabela, nome do crud, campos definidos do input
+$frontend = new Base($nomeDaTabela, $nomeCrud, $camposInputs);
