@@ -6,22 +6,18 @@ use App\API\ApiError;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-///////////////////////////// ALTERAR SOMENTE O CONTEÚDO A BAIXO ////////////////////////////////
-
 // 1) Para criar um novo controller, inicialmente é necessário alterar o nome da classe abaixo, 
 //referente a model.
 
-use App\Models\Avaliadores as Model; // 'App\Models\nome_classe'
+use App\Models\Tipo_Produtos as Model; // 'App\Models\nome_classe'
 
 // 2) Em seguida, é necessário definir um novo nome para o controller abaixo.
 
-class AvaliadoresController extends Controller { 
+class Tipo_ProdutosController extends Controller { 
 
 	// 3) Por fim, é necessário alterar a string abaixo para o nome do controller, no singular.
 
-	public $nomeClasse = 'Avaliador'; 
-	
-	///////////////////////// ALTERAR SOMENTE O CONTEÚDO A CIMA ////////////////////////////////
+	public $nomeClasse = 'Tipo Produto'; 
 	
 	private $classe;
 
@@ -30,15 +26,17 @@ class AvaliadoresController extends Controller {
     }
 
     public function index(){
-        return response()->json($this->classe->all());
+		$data = $this->classe->all();
+
+    	return response()->json($data);
     }
 
     public function show($id){
-        $classe = $this->classe->find($id);
+        $data = $this->classe->find($id);
 
-        if(!$classe) return response()->json(ApiError::errorMessage($this->nomeClasse.' não encontrado(a)!', 4040), 404);
+		if(!$data) return response()->json(ApiError::errorMessage($this->nomeClasse.' não encontrado(a)!', 4040), 404);
 
-    	return response()->json($classe);
+    	return response()->json($data);
     }
 
     public function store(Request $request){
@@ -46,10 +44,8 @@ class AvaliadoresController extends Controller {
 
 			$data = $request->all();
 			$this->classe->create($data);
-
-            $return = ['msg' => $this->nomeClasse.' criado(a) com sucesso!'];
             
-			return response()->json($return, 201);
+			return response()->json(['msg' => $this->nomeClasse.' criado(a) com sucesso!'], 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {
@@ -66,8 +62,7 @@ class AvaliadoresController extends Controller {
 			$classe = $this->classe->find($id);
 			$classe->update($data);
 
-			$return = ['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'];
-			return response()->json($return, 201);
+			return response()->json(['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'], 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {
@@ -77,9 +72,10 @@ class AvaliadoresController extends Controller {
 		}
     }
     
-    public function delete(Model $id){
+    public function delete($id){
 		try {
-			$id->delete();
+			$classe = $this->classe->find($id);
+			$classe->delete();
 
 			return response()->json(['msg' => $this->nomeClasse.' removido com sucesso!'], 200);
 

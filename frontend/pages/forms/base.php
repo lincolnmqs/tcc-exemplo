@@ -25,11 +25,20 @@
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
   
   <style>
+    .btn-opcoes-edicao {
+      margin-right: 5%;
+    }
+    .fa-wrench {
+      color: orange;
+    }
     .fa-trash-alt {
       color: red;
     }
     .table {
       text-align: center;
+    }
+    .btn-modal {
+      float: right;
     }
   </style>
 </head>
@@ -135,7 +144,18 @@
   <!-- /.navbar -->
   
   <!-- Slidebar -->
-  <?php include('slidebar.html') ?>
+  <?php 
+    include('slidebar.html');
+
+    if($nomeCrud[strlen($nomeCrud) - 1] == 's' || $nomeCrud[strlen($nomeCrud) - 1] == 'S')
+      $nameCrud = substr($nomeCrud, 0, -1);
+
+    else if($nomeDaTabela[strlen($nomeDaTabela) - 1] == 's' || $nomeDaTabela[strlen($nomeDaTabela) - 1] == 'S')
+      $nameCrud = substr($nomeDaTabela, 0, -1);
+      
+    else
+      $nameCrud = $nomeCrud;
+  ?>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -162,26 +182,30 @@
         <div class="row">
           <!-- left column -->
           <div class="col-md-12">
-            <!-- general form elements -->
-            <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title"><?php echo $nomeCrud; ?></h3>
-              </div>
-              <!-- /.card-header -->
-              <!-- form start -->
-              <form role="form" id="<?php echo "form-" . $nomeDaTabela; ?>">
-                <div class="card-body">
+            
+
+            <!-- Modal -->
+            <div class="modal fade" id="<?php echo "modal-" . $nomeDaTabela; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"><?php echo $nameCrud; ?></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
                   <?php 
 
                     $count = count($valorInputs);
-              
+
                     for($i=0; $i<$count; $i++){                       
                       if($valorInputs[$i]['tipo'] == 'password'){
                       ?> 
                         
                         <div class="form-group">
                           <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
-                          <input type="password" class="form-control" id="<?php echo $valorInputs[$i]['campo']; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
+                          <input type="password" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
                         </div>
                         
                       <?php   
@@ -190,106 +214,152 @@
                         
                         <div class="form-group">
                           <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
-                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i]['campo']; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
+                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
                         </div>
+                        <?php   
+                      } else if($valorInputs[$i]['tipo'] == 'number'){
+                      ?> 
                         
+                        <div class="form-group">
+                          <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="number" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
+                        </div>
+                          
                       <?php   
                       } else if($valorInputs[$i]['tipo'] == 'date'){
                       ?>  
                         
                         <div class="form-group">
                           <label for="<?php echo $valorInputs[$i]['titulo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
-                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i]['campo']; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>">
+                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>">
                         </div>
                         
                       <?php   
                       }
                     }
                   ?>
-                </div>
-                <!-- /.card-body -->
-
-                <div class="card-footer">
+                  </div>
+                  <div class="modal-footer">
                   <div onclick="postAPI()" class="btn btn-primary">Gravar</div>
+                  </div>
                 </div>
-              </form>
+              </div>
             </div>
-            <!-- /.card -->
-            
-            <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Lista de <?php echo $nomeCrud; ?></h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
-              <table id="<?php echo "table-" . $nomeDaTabela; ?>" class="table table-bordered table-hover">
-                <thead>
-                  <tr>
-                    <?php
-                      $count = count($valorInputs);
 
-                      for($i=0; $i<$count; $i++){ 
-                        if($valorInputs[$i]['visualizar']){
-                    ?>
-                    <th><?php echo $valorInputs[$i]['titulo']; ?></th>
-                    <?php
-                        }
-                     }
-                  ?>
-                    <th>Opções</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                  <?php
-                    $resultado = json_decode(file_get_contents($url));
+            <!-- Modal Edição -->
+            <div class="modal fade" id="<?php echo "modal-edicao-" . $nomeDaTabela; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"><?php echo 'Edição ' . $nameCrud; ?></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
 
-                    $count = count($resultado);
-              
-                    for($i=0; $i<$count; $i++){ 
-                      $newArray = get_object_vars($resultado[$i]);
-                    ?>
-                    <tr>
-                    <?php
-                      $countAux = count($valorInputs);
-              
-                      for($j=0; $j<$countAux; $j++){ 
-                        if($valorInputs[$j]['visualizar']){
-                  ?>
-                        <td><?php echo $newArray[$valorInputs[$j]['campo']]; ?></td>
-                  <?php
-                        }
+                    <input type="hidden" id="<?php echo 'id_' . $nomeDaTabela . '-input-edicao'; ?>" name="<?php echo 'id_' . $nomeDaTabela; ?>">
+
+                  <?php 
+
+                    $count = count($valorInputs);
+
+                    for($i=0; $i<$count; $i++){                       
+                      if($valorInputs[$i]['tipo'] == 'password'){
+                      ?> 
+                        
+                        <div class="form-group">
+                          <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="password" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input-edicao'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
+                        </div>
+                        
+                      <?php   
+                      } else if($valorInputs[$i]['tipo'] == 'string'){
+                      ?> 
+                        
+                        <div class="form-group">
+                          <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="text" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input-edicao'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
+                        </div>
+                        <?php   
+                      } else if($valorInputs[$i]['tipo'] == 'number'){
+                      ?> 
+                        
+                        <div class="form-group">
+                          <label for="<?php echo $valorInputs[$i]['campo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="number" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input-edicao'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>" placeholder="<?php echo $valorInputs[$i]['titulo']; ?>">
+                        </div>
+                          
+                      <?php   
+                      } else if($valorInputs[$i]['tipo'] == 'date'){
+                      ?>  
+                        
+                        <div class="form-group">
+                          <label for="<?php echo $valorInputs[$i]['titulo']; ?>"><?php echo $valorInputs[$i]['titulo']; ?></label>
+                          <input type="date" class="form-control" id="<?php echo $valorInputs[$i]['campo'] . '-input-edicao'; ?>" name="<?php echo $valorInputs[$i]['campo']; ?>">
+                        </div>
+                        
+                      <?php   
                       }
-                  ?>
-                      <td>
-                        <i class="nav-icon fas fa-trash-alt" onclick="deleteAPI(<?php echo $newArray['id_' . $nomeDaTabela]; ?>)"></i>
-                      </td>
-                    </tr>
-                  <?php
                     }
                   ?>
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <?php
-                      $count = count($valorInputs);
-
-                      for($i=0; $i<$count; $i++){ 
-                        if($valorInputs[$i]['visualizar']){
-                    ?>
-                    <th><?php echo $valorInputs[$i]['titulo']; ?></th>
-                    <?php
-                        }
-                     }
-                  ?>
-                    <th>Opções</th>
-                  </tr>
-                </tfoot>
-              </table>
+                  </div>
+                  <div class="modal-footer">
+                  <div onclick="updateAPI()" class="btn btn-primary">Salvar</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <!-- /.card-body -->
-          </div>
-          <!-- /.card -->
+            
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Lista de <?php echo $nomeCrud; ?></h3>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary btn-modal" data-toggle="modal" data-target="<?php echo "#modal-" . $nomeDaTabela; ?>">
+                  <?php echo "Cadastrar " . $nameCrud; ?>
+                </button>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="<?php echo "table-" . $nomeDaTabela; ?>" class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <?php
+                        $count = count($valorInputs);
+
+                        for($i=0; $i<$count; $i++){ 
+                          if($valorInputs[$i]['visualizar']){
+                      ?>
+                      <th><?php echo $valorInputs[$i]['titulo']; ?></th>
+                      <?php
+                          }
+                      }
+                    ?>
+                      <th>Opções</th>
+                    </tr>
+                  </thead>
+                  <tbody id="<?php echo "tbody-" . $nomeDaTabela; ?>"></tbody>
+                  <tfoot>
+                    <tr>
+                      <?php
+                        $count = count($valorInputs);
+
+                        for($i=0; $i<$count; $i++){ 
+                          if($valorInputs[$i]['visualizar']){
+                      ?>
+                      <th><?php echo $valorInputs[$i]['titulo']; ?></th>
+                      <?php
+                          }
+                      }
+                    ?>
+                      <th>Opções</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
 
           </div>
           <!--/.col (left) -->
@@ -315,50 +385,191 @@
 </div>
 <!-- ./wrapper -->
 <script>
+  const apiURL = "<?php echo $url; ?>";
+  const nomeTabela = "<?php echo $nomeDaTabela; ?>";
+  const id_tbody = "<?php echo "#tbody-" . $nomeDaTabela; ?>";
+  const tbody = document.querySelector(id_tbody);
+  const valorGet = getAPI();
+
+  valorGet.then(resultado => {
+    //console.log(resultado);
+    resultado.forEach(value => {
+      //console.log(value);
+
+      const tr = document.createElement('tr');
+      let tds = '';
+
+      <?php
+        $countAux = count($valorInputs);
+
+        for($j=0; $j<$countAux; $j++){ 
+          if($valorInputs[$j]['visualizar']){
+        ?>
+
+            const campo = "<?php echo $valorInputs[$j]['campo']; ?>";
+
+            tds += `<td>${value[campo]}</td>`; 
+         
+        <?php
+          }
+        }
+        ?>
+
+        tr.innerHTML += tds;
+
+        const tdOpcoes = document.createElement('td');
+        const divOpcoes = document.createElement('div');
+        const botaoEditar = document.createElement('i');
+        const botaoExcluir = document.createElement('i');
+
+        botaoEditar.className = 'fas fa-wrench btn-opcoes-edicao';
+        botaoEditar.title = "<?php echo "Alterar " . $nameCrud; ?>";
+        botaoEditar.setAttribute('data-toggle', 'modal');
+        botaoEditar.setAttribute('data-target', "<?php echo "#modal-edicao-" . $nomeDaTabela; ?>");
+
+        botaoExcluir.className = 'fas fa-trash-alt btn-opcoes-delete';
+        botaoExcluir.title = "<?php echo "Deletar " . $nameCrud; ?>";
+
+        divOpcoes.appendChild(botaoEditar);
+        divOpcoes.appendChild(botaoExcluir);
+      
+        botaoEditar.onclick = async () => {
+          const nomeInputId = "<?php echo 'id_' . $nomeDaTabela; ?>";
+          document.querySelector(`#${nomeInputId}-input-edicao`).value = value[nomeInputId];
+
+          <?php
+            for($i=0; $i<$countAux; $i++){ 
+          ?>
+              const nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
+              document.querySelector(`#${nomeInput}-input-edicao`).value = value[nomeInput];
+          <?php  
+            }
+          ?>
+        }
+
+        botaoExcluir.onclick = async () => {
+          if(confirm('Deseja realmente deletar o elemento?')){
+            try {
+              await delete_api(value[`id_${nomeTabela}`]);
+          
+              alert('Valor excluído!');
+
+              document.location.reload(true);
+            } catch (error) {
+              console.log(error);
+            }
+          }
+        }
+
+        tdOpcoes.appendChild(divOpcoes);
+        tr.appendChild(tdOpcoes);
+        tbody.appendChild(tr);
+    });
+  });
+
+  async function getAPI(){
+    try {
+      const chamada = await get_api();
+
+      return chamada;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function postAPI(){
-    let nomeInput, dadosInput;
     let valuesCreate = {};
     
     <?php
       $count = count($valorInputs);
 
-         for($i=0; $i<$count; $i++){ 
-    ?>
-    
-            nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
-
-            dadosInput = document.querySelector(`#${nomeInput}`).value;
-    
-            if(!dadosInput){
-              alert('Campo <?php echo $valorInputs[$i]['campo']; ?> vazio!');
-              return;
-            }
-            
-            valuesCreate[nomeInput] = dadosInput;
+        for($i=0; $i<$count; $i++){ 
+  ?>
+          const nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
+          const dadosInput = document.querySelector(`#${nomeInput}-input`).value;
+  
+          if(!dadosInput){
+            alert('Campo <?php echo $valorInputs[$i]['campo']; ?> vazio!');
+            return;
+          }
+          
+          valuesCreate[nomeInput] = dadosInput;
     <?php 
-           
-         }
+        }
     ?>     
     
-      console.log(valuesCreate);
+      //console.log(valuesCreate);
     
-      const valor = await create_api(valuesCreate);
+      try {
+        const valor = await create_api(valuesCreate);
     
-      alert('Valor criado!');
+        alert('Valor criado!');
+
+        document.location.reload(true);
+      } catch (error) {
+        console.log(error);
+      }
+  }
+
+  async function updateAPI(){
+    let valuesUpdate = {};
+
+    const nomeInputId = "<?php echo 'id_' . $nomeDaTabela; ?>";
+    valuesUpdate[nomeInputId] = document.querySelector(`#${nomeInputId}-input-edicao`).value;
+    
+    <?php
+      $count = count($valorInputs);
+
+      for($i=0; $i<$count; $i++){ 
+    ?>
+        const nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
+        valuesUpdate[nomeInput] = document.querySelector(`#${nomeInput}-input-edicao`).value;
+
+        if(!valuesUpdate[nomeInput]){
+          alert('Campo <?php echo $valorInputs[$i]['campo']; ?> vazio!');
+          return;
+        }
+    <?php        
+      }
+    ?>     
+    
+    //console.log(valuesUpdate);
+    
+    try {
+      const valor = await update_api(valuesUpdate[nomeInputId], valuesUpdate);
+  
+      alert('Valor alterado!');
+
+      document.location.reload(true);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function get_api(id) {
+    return new Promise(async (next, reject) => {
+      try {
+        const chamada = await fetch(`${apiURL}/${id ? `/${id}` : ''}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const dados = await chamada.json();
+    
+        next(dados);
+      } catch(erro) {
+        console.log(erro);
+      }
+    });
   }
   
-  async function deleteAPI(id){
-    await delete_api(id);
-    
-    alert('Valor excluído!');
-  }
-  
-  function create_api(dadosParaCadastro) {
+  function create_api(dadosParaCadastro){
     return new Promise(async (next, reject) => {
       const body = JSON.stringify(dadosParaCadastro);
 
       try {
-        const chamada = await fetch('<?php echo $url; ?>', {
+        const chamada = await fetch(apiURL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -374,12 +585,38 @@
       }
     });
   }
+
+  function update_api(id, dadosParaEdicao){
+    return new Promise(async (next, reject) => {
+      
+      const body = JSON.stringify(dadosParaEdicao);
+
+      try {
+        const chamada = await fetch(`${apiURL}/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body
+        });
+
+        const dados = await chamada.json();
+
+        next(dados);
+      } catch(erro) {
+        console.log(erro);
+      }
+    });
+  }
   
-  function delete_api(id) {
+  function delete_api(id){
     return new Promise(async (next, reject) => {
       try {
-        const chamada = await fetch(`<?php echo $url; ?>/${id}`, {
-          method: 'DELETE'
+        const chamada = await fetch(`${apiURL}/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
 
         const dados = await chamada.json();

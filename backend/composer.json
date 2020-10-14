@@ -12,8 +12,11 @@
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "illuminate/auth": "^8.9",
         "laravel/framework": "^8.0",
-        "laravel/tinker": "^2.0"
+        "laravel/tinker": "^2.0",
+        "rackspace/php-opencloud": "dev-master",
+        "tymon/jwt-auth": "1.0.1"
     },
     "require-dev": {
         "facade/ignition": "^2.3.6",

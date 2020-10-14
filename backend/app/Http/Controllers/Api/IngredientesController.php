@@ -5,20 +5,19 @@ namespace App\Http\Controllers\Api;
 use App\API\ApiError;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 
 // 1) Para criar um novo controller, inicialmente é necessário alterar o nome da classe abaixo, 
 //referente a model.
 
-use App\Models\User as Model; // 'App\Models\nome_classe'
+use App\Models\Ingredientes as Model; // 'App\Models\nome_classe'
 
 // 2) Em seguida, é necessário definir um novo nome para o controller abaixo.
 
-class PessoasController extends Controller { 
+class IngredientesController extends Controller { 
 
 	// 3) Por fim, é necessário alterar a string abaixo para o nome do controller, no singular.
 
-	public $nomeClasse = 'Pessoa'; 
+	public $nomeClasse = 'Ingrediente'; 
 	
 	private $classe;
 
@@ -27,29 +26,26 @@ class PessoasController extends Controller {
     }
 
     public function index(){
-		$data = $this->classe->all();
-
-    	return response()->json($data);
+        return response()->json($this->classe->all());
     }
 
     public function show($id){
-        $data = $this->classe->find($id);
+        $classe = $this->classe->find($id);
 
-		if(!$data) return response()->json(ApiError::errorMessage($this->nomeClasse.' não encontrado(a)!', 4040), 404);
+        if(!$classe) return response()->json(ApiError::errorMessage($this->nomeClasse.' não encontrado(a)!', 4040), 404);
 
-    	return response()->json($data);
+    	return response()->json($classe);
     }
 
     public function store(Request $request){
 		try {
 
 			$data = $request->all();
-
-			//$data['senha_pessoas'] = Hash::make($data['senha_pessoas']);
-
 			$this->classe->create($data);
+
+            $return = ['msg' => $this->nomeClasse.' criado(a) com sucesso!'];
             
-			return response()->json(['msg' => $this->nomeClasse.' criado(a) com sucesso!'], 201);
+			return response()->json($return, 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {
@@ -66,7 +62,8 @@ class PessoasController extends Controller {
 			$classe = $this->classe->find($id);
 			$classe->update($data);
 
-			return response()->json(['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'], 201);
+			$return = ['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'];
+			return response()->json($return, 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {

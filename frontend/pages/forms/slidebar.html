@@ -2,9 +2,8 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="../../index3.html" class="brand-link">
-      <img src="../../dist/img/AdminLTELogo.png"
-           alt="AdminLTE Logo"
-           class="brand-image img-circle elevation-3"
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Logotipo_IFET.svg/573px-Logotipo_IFET.svg.png"
+           class="brand-image"
            style="opacity: .8">
       <span class="brand-text font-weight-light">Sistema Web - NIPE</span>
     </a>
@@ -28,9 +27,9 @@
                with font-awesome or any other icon font library -->
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <i class="nav-icon fas fa-sort"></i>
               <p>
-                CRUDs
+                MENU
                 <i class="right fas fa-angle-left"></i>
               </p>
             </a>
@@ -52,12 +51,29 @@
                   if($valor[4] == "base") continue;
 
                   $pagina = $valor[4];
-                  $pagina[0] = strtoupper($pagina[0])
               ?>
               <li class="nav-item">
-                <a href="http://localhost/tcc/frontend/pages/forms/<?php echo $valor[4]; ?>.php" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p><?php echo $pagina; ?></p>
+                <a href="<?php echo $valor[4]; ?>.php" class="nav-link">
+                  <i class="far fa-folder nav-icon"></i>
+                  <p><?php 
+                      $split = explode('_', $pagina);
+
+                      $num = count($split);
+
+                      if($num > 1){
+                        for($i=0; $i<$num; $i++){
+                          $split[$i][0] = strtoupper($split[$i][0]);
+
+                          echo $split[$i] . ' ';
+                        }
+                      }
+                      
+                      else {
+                        $pagina[0] = strtoupper($pagina[0]);
+
+                        echo $pagina; 
+                      }
+                    ?></p>
                 </a>
               </li>
               <?php
