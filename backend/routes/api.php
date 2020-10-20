@@ -18,25 +18,19 @@ new Rotas([
 
 ///////////////////////////// ALTERAR SOMENTE O CONTEÚDO A CIMA ////////////////////////////////
 
-Route::post('auth/login', 'App\Http\Controllers\Api\AuthController@login');
-
-Route::group([
-    'middleware' => 'apiJwt',
-    'prefix' => 'auth'
-], function ($router) {
-    Route::post('logout', 'App\Http\Controllers\Api\AuthController@logout');
-    Route::post('refresh', 'App\Http\Controllers\Api\AuthController@refresh');
-    Route::post('me', 'App\Http\Controllers\Api\AuthController@me');
-});
-
 class Rotas {
     public function __construct($rotas){
         $this->rotas = $rotas;
         $this->count = count($this->rotas);
 
-        Route::namespace('App\Http\Controllers\Api')->group([
-            'middleware' => 'apiJwt'
-        ], function(){
+        Route::post('auth/login', 'App\Http\Controllers\Api\AuthController@login');
+
+        Route::namespace('App\Http\Controllers\Api')->middleware(['apiJwt'])->group(function(){
+            Route::prefix('auth')->group(function(){
+                Route::post('logout', 'App\Http\Controllers\Api\AuthController@logout');
+                Route::post('refresh', 'App\Http\Controllers\Api\AuthController@refresh');
+                Route::post('me', 'App\Http\Controllers\Api\AuthController@me');
+            });
 
             for($this->i=0; $this->i<$this->count; $this->i++){  
                 $this->controller = $this->rotas[$this->i];

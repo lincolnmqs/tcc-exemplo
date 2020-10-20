@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 
 class AuthController extends Controller {
@@ -15,8 +14,6 @@ class AuthController extends Controller {
     
     public function login(Request $request){
         $credentials = $request->only(['cpf_pessoas', 'senha_pessoas']);
-
-        //$credentials['senha_pessoas'] = Hash::make($credentials['senha_pessoas']);
 
         if(!$token = auth('api')->attempt($credentials)){
             return response()->json(['error' => 'Não autorizado'], 401);

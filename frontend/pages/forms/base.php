@@ -4,6 +4,7 @@
     public function __construct($nomeDaTabela, $nomeCrud, $valorInputs){
       
     $url = "http://localhost:8000/api/" . $nomeDaTabela;
+    $urlGlobal = "http://localhost:8000/api/";
 ?> 
 
 <!DOCTYPE html>
@@ -44,104 +45,6 @@
 </head>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
-  <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-      <!-- Messages Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-comments"></i>
-          <span class="badge badge-danger navbar-badge">3</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="../../dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Brad Diesel
-                  <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">Call me whenever you can...</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="../../dist/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  John Pierce
-                  <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">I got your message bro</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="../../dist/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Nora Silvester
-                  <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">The subject goes here</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-        </div>
-      </li>
-      <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-          <i class="fas fa-th-large"></i>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  <!-- /.navbar -->
   
   <!-- Slidebar -->
   <?php 
@@ -385,7 +288,11 @@
 </div>
 <!-- ./wrapper -->
 <script>
+  document.querySelector('#usuarioLogado').innerHTML = 'Logado: ' + window.localStorage.getItem('user_cpf');
+
+  const token = window.localStorage.getItem('access_token');
   const apiURL = "<?php echo $url; ?>";
+  const apiURLGlobal = "<?php echo $urlGlobal; ?>";
   const nomeTabela = "<?php echo $nomeDaTabela; ?>";
   const id_tbody = "<?php echo "#tbody-" . $nomeDaTabela; ?>";
   const tbody = document.querySelector(id_tbody);
@@ -393,6 +300,10 @@
 
   valorGet.then(resultado => {
     //console.log(resultado);
+
+    if(resultado.status && (resultado.status == 'O token está expirado' || resultado.status == 'Token é inválido' || resultado.status == 'Token de autorização não encontrado'))
+      autenticacaoInvalida();
+
     resultado.forEach(value => {
       //console.log(value);
 
@@ -406,7 +317,7 @@
           if($valorInputs[$j]['visualizar']){
         ?>
 
-            const campo = "<?php echo $valorInputs[$j]['campo']; ?>";
+            var campo = "<?php echo $valorInputs[$j]['campo']; ?>";
 
             tds += `<td>${value[campo]}</td>`; 
          
@@ -440,7 +351,7 @@
           <?php
             for($i=0; $i<$countAux; $i++){ 
           ?>
-              const nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
+              var nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
               document.querySelector(`#${nomeInput}-input-edicao`).value = value[nomeInput];
           <?php  
             }
@@ -467,6 +378,12 @@
     });
   });
 
+  function autenticacaoInvalida(){
+    window.localStorage.setItem('access_token', '');
+    window.localStorage.setItem('user_cpf', '');
+    window.location.href = 'login.html';
+  }
+
   async function getAPI(){
     try {
       const chamada = await get_api();
@@ -485,8 +402,8 @@
 
         for($i=0; $i<$count; $i++){ 
   ?>
-          const nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
-          const dadosInput = document.querySelector(`#${nomeInput}-input`).value;
+          var nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
+          var dadosInput = document.querySelector(`#${nomeInput}-input`).value;
   
           if(!dadosInput){
             alert('Campo <?php echo $valorInputs[$i]['campo']; ?> vazio!');
@@ -522,7 +439,7 @@
 
       for($i=0; $i<$count; $i++){ 
     ?>
-        const nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
+        var nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
         valuesUpdate[nomeInput] = document.querySelector(`#${nomeInput}-input-edicao`).value;
 
         if(!valuesUpdate[nomeInput]){
@@ -542,7 +459,21 @@
 
       document.location.reload(true);
     } catch (error) {
-      console.log(error);
+      alert(error);
+    }
+  }
+
+  async function chamadaLogout(){
+    try {
+      if(confirm('Tem certeza que deseja deslogar-se?')){
+        const valor = await logout();
+  
+        alert(valor);
+
+        document.location.reload(true);
+      }
+    } catch (error) {
+      alert(error);
     }
   }
 
@@ -552,14 +483,15 @@
         const chamada = await fetch(`${apiURL}/${id ? `/${id}` : ''}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           }
         });
         const dados = await chamada.json();
     
         next(dados);
-      } catch(erro) {
-        console.log(erro);
+      } catch(error) {
+        alert(error);
       }
     });
   }
@@ -572,7 +504,8 @@
         const chamada = await fetch(apiURL, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body
         });
@@ -580,11 +513,11 @@
         const dados = await chamada.json();
 
         next(dados);
-      } catch(erro) {
-        console.log(erro);
+      } catch(error) {
+        alert(error);
       }
     });
-  }
+  }logout
 
   function update_api(id, dadosParaEdicao){
     return new Promise(async (next, reject) => {
@@ -595,7 +528,8 @@
         const chamada = await fetch(`${apiURL}/${id}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body
         });
@@ -603,8 +537,8 @@
         const dados = await chamada.json();
 
         next(dados);
-      } catch(erro) {
-        console.log(erro);
+      } catch(error) {
+        alert(error);
       }
     });
   }
@@ -615,15 +549,36 @@
         const chamada = await fetch(`${apiURL}/${id}`, {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           }
         });
 
         const dados = await chamada.json();
 
         next();
-      } catch(erro) {
-        console.log(erro);
+      } catch(error) {
+        alert(error);
+      }
+    });
+  }
+
+  function logout(){
+    return new Promise(async (next, reject) => {
+      try {
+        const chamada = await fetch(apiURLGlobal + 'auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const dados = await chamada.json();
+
+        next(dados);
+      } catch(error) {
+        alert(error);
       }
     });
   }
