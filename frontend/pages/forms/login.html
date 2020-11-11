@@ -96,6 +96,10 @@
             window.localStorage.setItem('access_token', dados.access_token);
             window.localStorage.setItem('user_cpf', cpfLogin);
 
+            let data = new Date();
+            data.setDate(data.getDate() + 1);
+            window.localStorage.setItem('expires_in', data);
+
             window.location.href = 'produtos.php';
             
         } catch (error) {

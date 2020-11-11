@@ -1,10 +1,9 @@
 <?php
   class Base {
 
-    public function __construct($nomeDaTabela, $nomeCrud, $valorInputs){
-      
-    $url = "http://localhost:8000/api/" . $nomeDaTabela;
-    $urlGlobal = "http://localhost:8000/api/";
+    public function __construct($nomeDaTabela, $nomeCrud, $valorInputs, $relacionamentos){
+    
+    $urlApi = "http://localhost:8000/api/";
 ?> 
 
 <!DOCTYPE html>
@@ -41,13 +40,30 @@
     .btn-modal {
       float: right;
     }
+    .loader {
+      position: fixed;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      background: url('http://i.imgur.com/zAD2y29.gif') 50% 50% no-repeat white;
+    }
+    .sessao {
+      font-size: 14px;
+      color: #c6c19b;
+    }
   </style>
 </head>
+<div id="loader" class="loader"></div>
+<div style="display:none" id="tudo_page">
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
   
   <!-- Slidebar -->
   <?php 
+    $url = $urlApi . $nomeDaTabela;
+
     include('slidebar.html');
 
     if($nomeCrud[strlen($nomeCrud) - 1] == 's' || $nomeCrud[strlen($nomeCrud) - 1] == 'S')
@@ -140,6 +156,32 @@
                       <?php   
                       }
                     }
+
+                    $count = count($relacionamentos);
+
+                    if($count){
+                      for($i=0; $i<$count; $i++){                       
+                        if($relacionamentos[$i]['tipo'] == 'muitosParaUm'){
+                        ?> 
+
+                          <div class="form-group">
+                            <label for="<?php echo $relacionamentos[$i]['tabela']; ?>"><?php echo $relacionamentos[$i]['titulo']; ?></label>
+                            <select class="form-control" id="<?php echo $relacionamentos[$i]['tabela'] . '-input-select'; ?>"></select>
+                          </div>
+
+                      <?php 
+                        }
+                        else if($relacionamentos[$i]['tipo'] == 'muitosParaMuitos'){
+                      ?> 
+
+                        <div class="form-group">
+                          
+                        </div>
+
+                    <?php 
+                        }
+                      }
+                    }
                   ?>
                   </div>
                   <div class="modal-footer">
@@ -205,6 +247,31 @@
                       <?php   
                       }
                     }
+                    $count = count($relacionamentos);
+
+                    if($count){
+                      for($i=0; $i<$count; $i++){                       
+                        if($relacionamentos[$i]['tipo'] == 'muitosParaUm'){
+                        ?> 
+
+                          <div class="form-group">
+                            <label for="<?php echo $relacionamentos[$i]['tabela']; ?>"><?php echo $relacionamentos[$i]['titulo']; ?></label>
+                            <select class="form-control" id="<?php echo $relacionamentos[$i]['tabela'] . '-input-select'; ?>"></select>
+                          </div>
+
+                      <?php 
+                        }
+                        else if($relacionamentos[$i]['tipo'] == 'muitosParaMuitos'){
+                      ?> 
+
+                        <div class="form-group">
+                          
+                        </div>
+
+                    <?php 
+                        }
+                      }
+                    }
                   ?>
                   </div>
                   <div class="modal-footer">
@@ -232,11 +299,20 @@
 
                         for($i=0; $i<$count; $i++){ 
                           if($valorInputs[$i]['visualizar']){
-                      ?>
-                      <th><?php echo $valorInputs[$i]['titulo']; ?></th>
-                      <?php
+                        ?>
+                        <th><?php echo $valorInputs[$i]['titulo']; ?></th>
+                        <?php
+                            }
+                        }
+                        $count = count($relacionamentos);
+
+                        if($count){
+                          for($i=0; $i<$count; $i++){ 
+                          ?>
+                            <th><?php echo $relacionamentos[$i]['titulo']; ?></th>
+                          <?php
                           }
-                      }
+                        }
                     ?>
                       <th>Opções</th>
                     </tr>
@@ -249,11 +325,20 @@
 
                         for($i=0; $i<$count; $i++){ 
                           if($valorInputs[$i]['visualizar']){
-                      ?>
-                      <th><?php echo $valorInputs[$i]['titulo']; ?></th>
-                      <?php
+                        ?>
+                          <th><?php echo $valorInputs[$i]['titulo']; ?></th>
+                        <?php
                           }
-                      }
+                        }
+                        $count = count($relacionamentos);
+
+                        if($count){
+                          for($i=0; $i<$count; $i++){ 
+                          ?>
+                            <th><?php echo $relacionamentos[$i]['titulo']; ?></th>
+                          <?php
+                          }
+                        }
                     ?>
                       <th>Opções</th>
                     </tr>
@@ -287,12 +372,17 @@
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
+
+<div>
+
 <script>
+  const data = window.localStorage.getItem('expires_in');
+  document.querySelector('#timeSession').innerHTML = 'Sessão expira em: ' + new Date(data).toLocaleString();
   document.querySelector('#usuarioLogado').innerHTML = 'Logado: ' + window.localStorage.getItem('user_cpf');
 
   const token = window.localStorage.getItem('access_token');
   const apiURL = "<?php echo $url; ?>";
-  const apiURLGlobal = "<?php echo $urlGlobal; ?>";
+  const apiURLAll = "<?php echo $urlApi; ?>";
   const nomeTabela = "<?php echo $nomeDaTabela; ?>";
   const id_tbody = "<?php echo "#tbody-" . $nomeDaTabela; ?>";
   const tbody = document.querySelector(id_tbody);
@@ -304,7 +394,7 @@
     if(resultado.status && (resultado.status == 'O token está expirado' || resultado.status == 'Token é inválido' || resultado.status == 'Token de autorização não encontrado'))
       autenticacaoInvalida();
 
-    resultado.forEach(value => {
+    resultado.forEach(async value => {
       //console.log(value);
 
       const tr = document.createElement('tr');
@@ -324,6 +414,59 @@
         <?php
           }
         }
+
+        $countAux = count($relacionamentos);
+
+        if($countAux){
+          for($j=0; $j<$countAux; $j++){ 
+            if($relacionamentos[$j]['tipo'] == 'muitosParaUm'){
+          ?>
+              var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+              var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+              tds += `<td>${value[tabela][campo]}</td>`;
+
+              var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-select'; ?>";
+
+              let select = document.querySelectorAll(`#${input}`);
+
+              const values = await get_api_all(tabela);
+
+              for(let j = 0; j < select.length; j++){
+                for(let i = 0; i < values.length; i++){
+                  let opt = document.createElement("option");
+                  opt.value = values[i][`id_${tabela}`];
+                  opt.text = values[i][campo];
+
+                  select[j].add(opt, select[j].options[i]);
+                }
+              }
+            
+          <?php
+            }
+            else if($relacionamentos[$j]['tipo'] == 'muitosParaMuitos'){
+          ?>
+              var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+              var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+              let concatena = '';
+              const tam = value[tabela].length;
+
+              for(let i = 0; i < tam; i++){
+                concatena += value[tabela][i][campo];
+
+                if((tam > 1) && (i < tam - 1)) concatena += ', ';
+              }
+
+              tds += `<td>${concatena}</td>`;
+            
+          <?php
+            }
+          }
+        }
+
+        $countAux = count($valorInputs);
+        
         ?>
 
         tr.innerHTML += tds;
@@ -459,21 +602,13 @@
 
       document.location.reload(true);
     } catch (error) {
-      alert(error);
+      console.log(error);
     }
   }
 
-  async function chamadaLogout(){
-    try {
-      if(confirm('Tem certeza que deseja deslogar-se?')){
-        const valor = await logout();
-  
-        alert(valor);
-
-        document.location.reload(true);
-      }
-    } catch (error) {
-      alert(error);
+  function chamadaLogout(){
+    if(confirm('Tem certeza que deseja deslogar-se?')){
+      autenticacaoInvalida();
     }
   }
 
@@ -491,7 +626,26 @@
     
         next(dados);
       } catch(error) {
-        alert(error);
+        console.log(error);
+      }
+    });
+  }
+
+  function get_api_all(tabela, id) {
+    return new Promise(async (next, reject) => {
+      try {
+        const chamada = await fetch(`${apiURLAll}${tabela}/${id ? `/${id}` : ''}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const dados = await chamada.json();
+    
+        next(dados);
+      } catch(error) {
+        console.log(error);
       }
     });
   }
@@ -514,10 +668,10 @@
 
         next(dados);
       } catch(error) {
-        alert(error);
+        console.log(error);
       }
     });
-  }logout
+  }
 
   function update_api(id, dadosParaEdicao){
     return new Promise(async (next, reject) => {
@@ -538,7 +692,7 @@
 
         next(dados);
       } catch(error) {
-        alert(error);
+        console.log(error);
       }
     });
   }
@@ -558,27 +712,7 @@
 
         next();
       } catch(error) {
-        alert(error);
-      }
-    });
-  }
-
-  function logout(){
-    return new Promise(async (next, reject) => {
-      try {
-        const chamada = await fetch(apiURLGlobal + 'auth/logout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const dados = await chamada.json();
-
-        next(dados);
-      } catch(error) {
-        alert(error);
+        console.log(error);
       }
     });
   }
@@ -600,6 +734,10 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../dist/js/demo.js"></script>
 <script type="text/javascript">
+setInterval(function(){
+  document.querySelector('#loader').style['display'] = 'none';
+  document.querySelector('#tudo_page').style['display'] = '';
+}, 1000);
 $(document).ready(function () {
   bsCustomFileInput.init();
 });

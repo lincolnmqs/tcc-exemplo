@@ -15,52 +15,95 @@ use App\Models\Tipo_Produtos as Model; // 'App\Models\nome_classe'
 
 class Tipo_ProdutosController extends Controller { 
 
-	// 3) Por fim, é necessário alterar a string abaixo para o nome do controller, no singular.
+	// 3) Definir o nome e os relacionamentos da classe
 
 	public $nomeClasse = 'Tipo Produto'; 
-	
-	private $classe;
+	public $muitosParaMuitos = [];
 
     public function __construct(Model $classe){
-        $this->classe = $classe;
-    }
+		$this->classe = $classe;
+	}
+
+	// 4) Criar condições de acordo com os métodos relacionados
+	
+	public function relacionamento($classe, $tabela){
+		/*
+		if($tabela == 'ingredientes')
+			return $classe->ingredientes();
+		*/
+	}
+
+	public function aplicarRelacionamento($class, $data, $metodo){
+		if($this->muitosParaMuitos){
+			$count = count($this->muitosParaMuitos);
+
+			for($i=0; $i<$count; $i++){
+				$dataAux = $data;
+
+				unset($data['ids_' . $this->muitosParaMuitos[$i]]);
+
+				$classe = $class;
+
+				if($metodo == 'store')
+					$classe = $this->classe->create($data);
+
+				else if($metodo == 'update')
+					$class->update($data);
+
+				else if($metodo == 'delete')
+					$class->delete();
+
+				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos']);
+
+				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos']);
+			}
+		}
+	}
 
     public function index(){
-		$data = $this->classe->all();
-
-    	return response()->json($data);
+        return response()->json($this->classe->all());
     }
 
     public function show($id){
-        $data = $this->classe->find($id);
+        $classe = $this->classe->find($id);
 
-		if(!$data) return response()->json(ApiError::errorMessage($this->nomeClasse.' não encontrado(a)!', 4040), 404);
+        if(!$classe) return response()->json(ApiError::errorMessage($this->nomeClasse.' não encontrado(a)!', 4040), 404);
 
-    	return response()->json($data);
+    	return response()->json($classe);
     }
 
     public function store(Request $request){
 		try {
-
 			$data = $request->all();
-			$this->classe->create($data);
-            
+
+			if($this->muitosParaMuitos){
+				$this->aplicarRelacionamento(null, $data, 'store');
+			} else {	
+				$this->classe->create($data);
+			}
+
 			return response()->json(['msg' => $this->nomeClasse.' criado(a) com sucesso!'], 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {
-				return response()->json(ApiError::errorMessage($e->getMessage(), 1010), 500);
+				return response()->json(ApiError::errorMessage($e->getMessage(), 1011),  500);
 			}
-			return response()->json(ApiError::errorMessage('Houve um erro ao realizar operação de salvar', 1010),  500);
+			return response()->json(ApiError::errorMessage('Houve um erro ao realizar operação de cadastrar', 1011), 500);
 		}
     }
 
     public function update(Request $request, $id){
 		try {
-
 			$data   = $request->all();
 			$classe = $this->classe->find($id);
-			$classe->update($data);
+
+			if($this->muitosParaMuitos){
+				$this->aplicarRelacionamento($classe, $data, 'update');
+			} else {
+				$classe->update($data);
+			}
 
 			return response()->json(['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'], 201);
 
@@ -72,10 +115,16 @@ class Tipo_ProdutosController extends Controller {
 		}
     }
     
-    public function delete($id){
+    public function delete(Request $request, $id){
 		try {
+			$data   = $request->all();
 			$classe = $this->classe->find($id);
-			$classe->delete();
+
+			if($this->muitosParaMuitos){
+				$this->aplicarRelacionamento($classe, $data, 'delete');
+			} else {	
+				$classe->delete();
+			}
 
 			return response()->json(['msg' => $this->nomeClasse.' removido com sucesso!'], 200);
 

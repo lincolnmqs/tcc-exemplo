@@ -18,5 +18,19 @@ $valorInputs = [
     'visualizar' => true
   ]
 ];
+$relacionamentos = [
+  [
+    'tabela'      => 'tipo_produtos', 
+    'tipo'        => 'muitosParaUm',
+    'titulo'      => 'Tipo Produtos',
+    'visualizar'  => 'nome_tipo_produtos'
+  ],
+  [
+    'tabela'      => 'ingredientes', 
+    'tipo'        => 'muitosParaMuitos',
+    'titulo'      => 'Ingredientes',
+    'visualizar'  => 'nome_ingredientes'
+  ]
+];
 
-new Base($nomeDaTabela, $nomeCrud, $valorInputs);
+new Base($nomeDaTabela, $nomeCrud, $valorInputs, $relacionamentos);

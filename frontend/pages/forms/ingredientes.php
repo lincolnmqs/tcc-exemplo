@@ -12,5 +12,6 @@ $valorInputs = [
     'visualizar' => true
   ]
 ];
+$relacionamentos = [];
 
-new Base($nomeDaTabela, $nomeCrud, $valorInputs);
+new Base($nomeDaTabela, $nomeCrud, $valorInputs, $relacionamentos);

@@ -15,15 +15,52 @@ use App\Models\Ingredientes as Model; // 'App\Models\nome_classe'
 
 class IngredientesController extends Controller { 
 
-	// 3) Por fim, é necessário alterar a string abaixo para o nome do controller, no singular.
+	// 3) Definir o nome e os relacionamentos da classe
 
-	public $nomeClasse = 'Ingrediente'; 
-	
-	private $classe;
+	public $nomeClasse = 'Ingredientes'; 
+	public $muitosParaMuitos = [];
 
     public function __construct(Model $classe){
-        $this->classe = $classe;
-    }
+		$this->classe = $classe;
+	}
+
+	// 4) Criar condições de acordo com os métodos relacionados
+	
+	public function relacionamento($classe, $tabela){
+		/*
+		if($tabela == 'ingredientes')
+			return $classe->ingredientes();
+		*/
+	}
+
+	public function aplicarRelacionamento($class, $data, $metodo){
+		if($this->muitosParaMuitos){
+			$count = count($this->muitosParaMuitos);
+
+			for($i=0; $i<$count; $i++){
+				$dataAux = $data;
+
+				unset($data['ids_' . $this->muitosParaMuitos[$i]]);
+
+				$classe = $class;
+
+				if($metodo == 'store')
+					$classe = $this->classe->create($data);
+
+				else if($metodo == 'update')
+					$class->update($data);
+
+				else if($metodo == 'delete')
+					$class->delete();
+
+				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos']);
+
+				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos']);
+			}
+		}
+	}
 
     public function index(){
         return response()->json($this->classe->all());
@@ -39,31 +76,36 @@ class IngredientesController extends Controller {
 
     public function store(Request $request){
 		try {
-
 			$data = $request->all();
-			$this->classe->create($data);
 
-            $return = ['msg' => $this->nomeClasse.' criado(a) com sucesso!'];
-            
-			return response()->json($return, 201);
+			if($this->muitosParaMuitos){
+				$this->aplicarRelacionamento(null, $data, 'store');
+			} else {	
+				$this->classe->create($data);
+			}
+
+			return response()->json(['msg' => $this->nomeClasse.' criado(a) com sucesso!'], 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {
-				return response()->json(ApiError::errorMessage($e->getMessage(), 1010), 500);
+				return response()->json(ApiError::errorMessage($e->getMessage(), 1011),  500);
 			}
-			return response()->json(ApiError::errorMessage('Houve um erro ao realizar operação de salvar', 1010),  500);
+			return response()->json(ApiError::errorMessage('Houve um erro ao realizar operação de cadastrar', 1011), 500);
 		}
     }
 
     public function update(Request $request, $id){
 		try {
-
 			$data   = $request->all();
 			$classe = $this->classe->find($id);
-			$classe->update($data);
 
-			$return = ['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'];
-			return response()->json($return, 201);
+			if($this->muitosParaMuitos){
+				$this->aplicarRelacionamento($classe, $data, 'update');
+			} else {
+				$classe->update($data);
+			}
+
+			return response()->json(['msg' => $this->nomeClasse.' atualizad(a) com sucesso!'], 201);
 
 		} catch (\Exception $e) {
 			if(config('app.debug')) {
@@ -73,10 +115,16 @@ class IngredientesController extends Controller {
 		}
     }
     
-    public function delete($id){
+    public function delete(Request $request, $id){
 		try {
+			$data   = $request->all();
 			$classe = $this->classe->find($id);
-			$classe->delete();
+
+			if($this->muitosParaMuitos){
+				$this->aplicarRelacionamento($classe, $data, 'delete');
+			} else {	
+				$classe->delete();
+			}
 
 			return response()->json(['msg' => $this->nomeClasse.' removido com sucesso!'], 200);
 

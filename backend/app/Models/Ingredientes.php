@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ingredientes extends Model {
 
+    public $timestamps = false;
+
     // 2) Em seguida, é necessário definir os campos da tabela abaixo:
 
     // nome da tabela
@@ -22,6 +24,7 @@ class Ingredientes extends Model {
           'nome_ingredientes'
     ];
 
-    public $timestamps = false;
+    // possui relacionamento muitos para muitos
+    protected $hidden = ['pivot'];
 
 }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\API\ApiError;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 
 // 1) Para criar um novo controller, inicialmente é necessário alterar o nome da classe abaixo, 
 //referente a model.
@@ -45,8 +44,6 @@ class PessoasController extends Controller {
 
 			$data = $request->all();
 
-			//$data['senha_pessoas'] = Hash::make($data['senha_pessoas']);
-
 			$this->classe->create($data);
             
 			return response()->json(['msg' => $this->nomeClasse.' criado(a) com sucesso!'], 201);
@@ -79,6 +76,7 @@ class PessoasController extends Controller {
     public function delete($id){
 		try {
 			$classe = $this->classe->find($id);
+
 			$classe->delete();
 
 			return response()->json(['msg' => $this->nomeClasse.' removido com sucesso!'], 200);
