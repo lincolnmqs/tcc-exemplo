@@ -6,6 +6,8 @@ use App\API\ApiError;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+// INÍCIO
+
 // 1) Alterar o nome da classe abaixo, referente a model
 
 use App\Models\Produtos as Model; // 'App\Models\nome_classe'
@@ -14,7 +16,7 @@ use App\Models\Produtos as Model; // 'App\Models\nome_classe'
 
 class ProdutosController extends Controller { 
 
-	// 3) Definir o nome e os relacionamentos da classe
+	// 3) Definir o nome e os relacionamentos "muito para muitos" da classe
 
 	public $nomeClasse = 'Produto'; 
 	public $muitosParaMuitos = ['ingredientes'];
@@ -30,6 +32,19 @@ class ProdutosController extends Controller {
 			return $classe->ingredientes();
 	}
 
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	// FIM
+
 	public function aplicarRelacionamento($class, $data, $metodo){
 		if($this->muitosParaMuitos){
 			$count = count($this->muitosParaMuitos);
@@ -41,20 +56,36 @@ class ProdutosController extends Controller {
 
 				$classe = $class;
 
-				if($metodo == 'store')
+				if($metodo == 'store'){
 					$classe = $this->classe->create($data);
+					
+					if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar'])
+						$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar']);
 
-				else if($metodo == 'update')
+					if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover'])
+						$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover']);
+				}
+
+				else if($metodo == 'update'){
+					if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar'])
+						$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar']);
+
+					if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover'])
+						$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover']);
+
 					$class->update($data);
+				}
+					
 
-				else if($metodo == 'delete')
+				else if($metodo == 'delete'){
+					if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar']);
+
+					if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover'])
+						$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover']);
+
 					$class->delete();
-
-				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos'])
-					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos']);
-
-				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos'])
-					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos']);
+				}
 			}
 		}
 	}

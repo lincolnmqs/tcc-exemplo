@@ -6,6 +6,8 @@ use App\API\ApiError;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+// INÍCIO
+
 // 1) Para criar um novo controller, inicialmente é necessário alterar o nome da classe abaixo, 
 //referente a model.
 
@@ -15,9 +17,9 @@ use App\Models\Tipo_Produtos as Model; // 'App\Models\nome_classe'
 
 class Tipo_ProdutosController extends Controller { 
 
-	// 3) Definir o nome e os relacionamentos da classe
+	// 3) Definir o nome e os relacionamentos "muito para muitos" da classe
 
-	public $nomeClasse = 'Tipo Produto'; 
+	public $nomeClasse = 'Tipo Produtos'; 
 	public $muitosParaMuitos = [];
 
     public function __construct(Model $classe){
@@ -32,6 +34,19 @@ class Tipo_ProdutosController extends Controller {
 			return $classe->ingredientes();
 		*/
 	}
+
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	// FIM
 
 	public function aplicarRelacionamento($class, $data, $metodo){
 		if($this->muitosParaMuitos){
@@ -53,11 +68,11 @@ class Tipo_ProdutosController extends Controller {
 				else if($metodo == 'delete')
 					$class->delete();
 
-				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos'])
-					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['novos']);
+				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->attach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['adicionar']);
 
-				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos'])
-					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['antigos']);
+				if($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover'])
+					$this->relacionamento($classe, $this->muitosParaMuitos[$i])->detach($dataAux['ids_' . $this->muitosParaMuitos[$i]]['remover']);
 			}
 		}
 	}

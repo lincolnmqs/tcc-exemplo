@@ -174,9 +174,8 @@
                         else if($relacionamentos[$i]['tipo'] == 'muitosParaMuitos'){
                       ?> 
 
-                        <div class="form-group">
-                          
-                        </div>
+                        <label for="<?php echo $relacionamentos[$i]['tabela']; ?>"><?php echo $relacionamentos[$i]['titulo']; ?></label>
+                        <div id="<?php echo $relacionamentos[$i]['tabela'] . '-form-checkbox'; ?>"></div>
 
                     <?php 
                         }
@@ -256,7 +255,7 @@
 
                           <div class="form-group">
                             <label for="<?php echo $relacionamentos[$i]['tabela']; ?>"><?php echo $relacionamentos[$i]['titulo']; ?></label>
-                            <select class="form-control" id="<?php echo $relacionamentos[$i]['tabela'] . '-input-select'; ?>"></select>
+                            <select class="form-control" id="<?php echo $relacionamentos[$i]['tabela'] . '-input-edicao-select'; ?>"></select>
                           </div>
 
                       <?php 
@@ -264,9 +263,8 @@
                         else if($relacionamentos[$i]['tipo'] == 'muitosParaMuitos'){
                       ?> 
 
-                        <div class="form-group">
-                          
-                        </div>
+                          <label for="<?php echo $relacionamentos[$i]['tabela']; ?>"><?php echo $relacionamentos[$i]['titulo']; ?></label>
+                          <div id="<?php echo $relacionamentos[$i]['tabela'] . '-form-edicao-checkbox'; ?>"></div>
 
                     <?php 
                         }
@@ -388,14 +386,49 @@
   const tbody = document.querySelector(id_tbody);
   const valorGet = getAPI();
 
-  valorGet.then(resultado => {
+  let optControle = [];
+  let checkControle = [];
+  let optControleEdit = [];
+  let checkControleEdit = [];
+
+  let dataValue = {};
+  let dataValueEdit = {};
+
+  valorGet.then(async resultado => {
     //console.log(resultado);
+    let values = [];
+
+    <?php
+
+      $countAux = count($relacionamentos);
+
+      if($countAux){
+        for($j=0; $j<$countAux; $j++){ 
+
+          ?>
+
+            var tabelaRel = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+            var campoRel  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+          
+            var val = await get_api_all(tabelaRel);
+
+            values[tabelaRel] = [ ...val ];
+
+          <?php
+        }
+      }
+
+    ?>
+
+    //console.log(values);
 
     if(resultado.status && (resultado.status == 'O token está expirado' || resultado.status == 'Token é inválido' || resultado.status == 'Token de autorização não encontrado'))
       autenticacaoInvalida();
 
     resultado.forEach(async value => {
       //console.log(value);
+
+      dataValue = value;
 
       const tr = document.createElement('tr');
       let tds = '';
@@ -427,19 +460,17 @@
               tds += `<td>${value[tabela][campo]}</td>`;
 
               var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-select'; ?>";
+              let select = document.querySelector(`#${input}`);
 
-              let select = document.querySelectorAll(`#${input}`);
+              for(let j = 0; j < values[tabela].length; j++){
+                let opt = document.createElement("option");
+                opt.value = values[tabela][j][`id_${tabela}`];
+                opt.text = values[tabela][j][campo];
 
-              const values = await get_api_all(tabela);
+                if(optControle[values[tabela][j][campo]]) continue;
 
-              for(let j = 0; j < select.length; j++){
-                for(let i = 0; i < values.length; i++){
-                  let opt = document.createElement("option");
-                  opt.value = values[i][`id_${tabela}`];
-                  opt.text = values[i][campo];
-
-                  select[j].add(opt, select[j].options[i]);
-                }
+                select.add(opt, select.options[j]);
+                optControle[values[tabela][j][campo]] = true;
               }
             
           <?php
@@ -459,6 +490,34 @@
               }
 
               tds += `<td>${concatena}</td>`;
+
+              var formCheck = "<?php echo $relacionamentos[$j]['tabela'] . '-form-checkbox'; ?>";
+              let formCheckbox = document.querySelector(`#${formCheck}`);
+
+              for(let j = 0; j < values[tabela].length; j++){
+                let div = document.createElement('div');
+                div.className = 'form-check form-check-inline';
+
+                let input = document.createElement('input');
+                input.className = 'form-input-check';
+                input.type = 'checkbox';
+                input.id = tabela;
+                input.value = values[tabela][j][`id_${tabela}`];
+
+                let label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.for = tabela;
+                label.innerText = values[tabela][j][campo];
+
+                if(checkControle[values[tabela][j][campo]]) continue;
+
+                checkControle[values[tabela][j][campo]] = true;       
+
+                div.appendChild(input);
+                div.appendChild(label);
+                
+                formCheckbox.appendChild(div);               
+              }
             
           <?php
             }
@@ -488,6 +547,8 @@
         divOpcoes.appendChild(botaoExcluir);
       
         botaoEditar.onclick = async () => {
+          dataValueEdit = value;
+
           const nomeInputId = "<?php echo 'id_' . $nomeDaTabela; ?>";
           document.querySelector(`#${nomeInputId}-input-edicao`).value = value[nomeInputId];
 
@@ -498,13 +559,123 @@
               document.querySelector(`#${nomeInput}-input-edicao`).value = value[nomeInput];
           <?php  
             }
+
+            $countAux = count($relacionamentos);
+
+            if($countAux){
+              for($j=0; $j<$countAux; $j++){ 
+                if($relacionamentos[$j]['tipo'] == 'muitosParaUm'){
+              ?>
+                  var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+                  var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+                  var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-edicao-select'; ?>";
+                  let select = document.querySelector(`#${input}`);
+
+                  for(let j = 0; j < values[tabela].length; j++){
+                    let opt = document.createElement("option");
+                    opt.value = values[tabela][j][`id_${tabela}`];
+                    opt.text = values[tabela][j][campo];
+
+                    if(!optControleEdit[values[tabela][j][campo]]){
+                      select.add(opt, select.options[j]);
+                      optControleEdit[values[tabela][j][campo]] = true;
+                    }
+
+                    [].forEach.call(select.children, function(el) {
+                      if(value[tabela][`id_${tabela}`] == el.value){
+                        el.selected = true;
+                      }
+                    });
+                  }
+                
+              <?php
+                }
+                else if($relacionamentos[$j]['tipo'] == 'muitosParaMuitos'){
+              ?>
+                  var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+                  var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+                  var formCheck = "<?php echo $relacionamentos[$j]['tabela'] . '-form-edicao-checkbox'; ?>";
+                  let formCheckbox = document.querySelector(`#${formCheck}`);
+
+                  for(let j = 0; j < values[tabela].length; j++){
+                    let div = document.createElement('div');
+                    div.className = 'form-check form-check-inline';
+
+                    let input = document.createElement('input');
+                    input.className = 'form-input-check';
+                    input.type = 'checkbox';
+                    input.id = tabela;
+                    input.value = values[tabela][j][`id_${tabela}`];
+
+                    [].forEach.call(formCheckbox.children, function(el) {
+                      el.children[0].checked = false;
+
+                      for(let i = 0; i < value[tabela].length; i++){
+                        if(value[tabela][i][`id_${tabela}`] == el.children[0].value){
+                          el.children[0].checked = true;
+                        }
+                      }
+                    });
+
+                    let label = document.createElement('label');
+                    label.className = 'form-check-label';
+                    label.for = tabela;
+                    label.innerText = values[tabela][j][campo];
+
+                    if(checkControleEdit[values[tabela][j][campo]]) continue;
+
+                    checkControleEdit[values[tabela][j][campo]] = true;       
+
+                    div.appendChild(input);
+                    div.appendChild(label);
+                    
+                    formCheckbox.appendChild(div);               
+                  }
+                
+              <?php
+                }
+              }
+            }
           ?>
         }
 
         botaoExcluir.onclick = async () => {
+          let valuesDelete = {};
+
+          <?php  
+
+          $countAux = count($relacionamentos);
+
+          if($countAux){
+            for($j=0; $j<$countAux; $j++){ 
+              if($relacionamentos[$j]['tipo'] == 'muitosParaMuitos'){
+                ?>
+
+                  var tabelaRel = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+                  var campoRel  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+                  let remover = [];                 
+
+                  for(let i = 0; i < value[tabelaRel].length; i++){
+                    remover.push(value[tabelaRel][i][`id_${tabelaRel}`]);
+                  }
+
+                  valuesDelete[`ids_${tabelaRel}`] = { 'adicionar': [], 'remover': remover };
+
+                  //console.log(valuesDelete);
+
+                <?php
+              }
+            }
+          } 
+          ?>
+
           if(confirm('Deseja realmente deletar o elemento?')){
             try {
-              await delete_api(value[`id_${nomeTabela}`]);
+              if(valuesDelete) await delete_api(value[`id_${nomeTabela}`], valuesDelete);
+              else await delete_api(value[`id_${nomeTabela}`]);
           
               alert('Valor excluído!');
 
@@ -554,7 +725,50 @@
           }
           
           valuesCreate[nomeInput] = dadosInput;
+          
     <?php 
+        }
+
+        $countAux = count($relacionamentos);
+
+        if($countAux){
+          for($j=0; $j<$countAux; $j++){ 
+            if($relacionamentos[$j]['tipo'] == 'muitosParaUm'){
+          ?>
+              var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+              var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+              var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-select'; ?>";
+              let select = document.querySelectorAll(`#${input}`);
+
+              for(let i = 0; i < select.length; i++){
+                if(select[i].value){
+                  valuesCreate[`id_${tabela}`] = select[i].value;
+                }
+              }
+
+          <?php
+            }
+            else if($relacionamentos[$j]['tipo'] == 'muitosParaMuitos'){
+          ?>
+              var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+              var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+              let checkboxs = document.querySelectorAll('.form-input-check');
+
+              let adicionar = [];
+
+              for(let i = 0; i < checkboxs.length; i++){
+                if(checkboxs[i].checked){
+                  adicionar.push(checkboxs[i].value);
+                } 
+              }
+
+              valuesCreate[`ids_${tabela}`] = { 'adicionar': adicionar, 'remover': [] };
+            
+          <?php
+            }
+          }
         }
     ?>     
     
@@ -575,15 +789,23 @@
     let valuesUpdate = {};
 
     const nomeInputId = "<?php echo 'id_' . $nomeDaTabela; ?>";
-    valuesUpdate[nomeInputId] = document.querySelector(`#${nomeInputId}-input-edicao`).value;
+    valuesUpdate[nomeInputId] = Number(document.querySelector(`#${nomeInputId}-input-edicao`).value);
     
     <?php
       $count = count($valorInputs);
 
+      $num = false;
+
       for($i=0; $i<$count; $i++){ 
+        if($valorInputs[$i]['tipo'] == 'number')
+          $num = true;
     ?>
+        var num = "<?php echo $num; ?>";
         var nomeInput = "<?php echo $valorInputs[$i]['campo']; ?>";
         valuesUpdate[nomeInput] = document.querySelector(`#${nomeInput}-input-edicao`).value;
+
+        if(num)
+          valuesUpdate[nomeInput] = Number(valuesUpdate[nomeInput]);
 
         if(!valuesUpdate[nomeInput]){
           alert('Campo <?php echo $valorInputs[$i]['campo']; ?> vazio!');
@@ -591,11 +813,68 @@
         }
     <?php        
       }
-    ?>     
-    
-    //console.log(valuesUpdate);
+      $countAux = count($relacionamentos);
+
+      if($countAux){
+        for($j=0; $j<$countAux; $j++){ 
+          if($relacionamentos[$j]['tipo'] == 'muitosParaUm'){
+        ?>
+            var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+            var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+            var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-edicao-select'; ?>";
+            let select = document.querySelector(`#${input}`);
+
+            [].forEach.call(select.children, function(el) {
+              if(el.selected)
+                valuesUpdate[`id_${tabela}`] = Number(el.value);
+            });
+            
+        <?php 
+        } else if($relacionamentos[$j]['tipo'] == 'muitosParaMuitos'){
+          ?>
+            var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+            var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+
+            var formCheck = "<?php echo $relacionamentos[$j]['tabela'] . '-form-edicao-checkbox'; ?>";
+            let formCheckbox = document.querySelector(`#${formCheck}`);
+
+            let checkboxs = {
+              'adicionar': [],
+              'remover': []
+            };
+
+            [].forEach.call(formCheckbox.children, function(el) {
+              let ok = true;
+              
+              if(el.children[0].checked){
+                for(let i = 0; i < dataValueEdit[tabela].length; i++){
+                  if(dataValueEdit[tabela][i][`id_${tabela}`] == el.children[0].value)
+                    ok = false;
+                }
+              } else {
+                ok = false;
+                checkboxs['remover'].push(Number(el.children[0].value));
+              }
+
+              if(ok){
+                checkboxs['adicionar'].push(Number(el.children[0].value));
+              }
+            });
+
+            valuesUpdate[`ids_${tabela}`] = {...checkboxs};
+          
+        <?php
+          }
+        }
+      }
+    ?>   
+
+    //console.log(dataValueEdit);
+    //console.log(valuesUpdate);  
     
     try {
+
       const valor = await update_api(valuesUpdate[nomeInputId], valuesUpdate);
   
       alert('Valor alterado!');
@@ -697,18 +976,34 @@
     });
   }
   
-  function delete_api(id){
+  function delete_api(id, dadosParaExclusao){
     return new Promise(async (next, reject) => {
-      try {
-        const chamada = await fetch(`${apiURL}/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
 
-        const dados = await chamada.json();
+      try {
+        if(dadosParaExclusao){
+          const body = JSON.stringify(dadosParaExclusao);
+
+          const chamada = await fetch(`${apiURL}/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body
+          });
+
+          const dados = await chamada.json();
+        } else {
+          const chamada = await fetch(`${apiURL}/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          const dados = await chamada.json();
+        }
 
         next();
       } catch(error) {
