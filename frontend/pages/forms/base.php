@@ -609,16 +609,6 @@
                     input.id = tabela;
                     input.value = values[tabela][j][`id_${tabela}`];
 
-                    [].forEach.call(formCheckbox.children, function(el) {
-                      el.children[0].checked = false;
-
-                      for(let i = 0; i < value[tabela].length; i++){
-                        if(value[tabela][i][`id_${tabela}`] == el.children[0].value){
-                          el.children[0].checked = true;
-                        }
-                      }
-                    });
-
                     let label = document.createElement('label');
                     label.className = 'form-check-label';
                     label.for = tabela;
@@ -633,6 +623,16 @@
                     
                     formCheckbox.appendChild(div);               
                   }
+
+                  [].forEach.call(formCheckbox.children, function(el) {
+                    el.children[0].checked = false;
+
+                    for(let i = 0; i < value[tabela].length; i++){
+                      if(value[tabela][i][`id_${tabela}`] == el.children[0].value){
+                        el.children[0].checked = true;
+                      }
+                    }
+                  });
                 
               <?php
                 }
