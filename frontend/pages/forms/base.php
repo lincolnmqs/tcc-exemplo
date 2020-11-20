@@ -407,14 +407,66 @@
 
           ?>
 
-            var tabelaRel = "<?php echo $relacionamentos[$j]['tabela']; ?>";
-            var campoRel  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
+            var tabela = "<?php echo $relacionamentos[$j]['tabela']; ?>";
+            var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
           
-            var val = await get_api_all(tabelaRel);
+            var val = await get_api_all(tabela);
 
-            values[tabelaRel] = [ ...val ];
+            values[tabela] = [ ...val ];
 
           <?php
+            if($relacionamentos[$j]['tipo'] == 'muitosParaUm'){
+          ?>
+
+              var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-select'; ?>";
+              let select = document.querySelector(`#${input}`);
+
+              for(let j = 0; j < values[tabela].length; j++){
+                let opt = document.createElement("option");
+                opt.value = values[tabela][j][`id_${tabela}`];
+                opt.text = values[tabela][j][campo];
+
+                if(optControle[values[tabela][j][campo]]) continue;
+
+                select.add(opt, select.options[j]);
+                optControle[values[tabela][j][campo]] = true;
+              }
+            
+          <?php
+            }
+            else if($relacionamentos[$j]['tipo'] == 'muitosParaMuitos'){
+          ?>
+
+              var formCheck = "<?php echo $relacionamentos[$j]['tabela'] . '-form-checkbox'; ?>";
+              let formCheckbox = document.querySelector(`#${formCheck}`);
+
+              for(let j = 0; j < values[tabela].length; j++){
+                let div = document.createElement('div');
+                div.className = 'form-check form-check-inline';
+
+                let input = document.createElement('input');
+                input.className = 'form-input-check';
+                input.type = 'checkbox';
+                input.id = tabela;
+                input.value = values[tabela][j][`id_${tabela}`];
+
+                let label = document.createElement('label');
+                label.className = 'form-check-label';
+                label.for = tabela;
+                label.innerText = values[tabela][j][campo];
+
+                if(checkControle[values[tabela][j][campo]]) continue;
+
+                checkControle[values[tabela][j][campo]] = true;       
+
+                div.appendChild(input);
+                div.appendChild(label);
+                
+                formCheckbox.appendChild(div);               
+              }
+
+          <?php
+            }
         }
       }
 
@@ -458,20 +510,6 @@
               var campo  = "<?php echo $relacionamentos[$j]['visualizar']; ?>";
 
               tds += `<td>${value[tabela][campo]}</td>`;
-
-              var input = "<?php echo $relacionamentos[$j]['tabela'] . '-input-select'; ?>";
-              let select = document.querySelector(`#${input}`);
-
-              for(let j = 0; j < values[tabela].length; j++){
-                let opt = document.createElement("option");
-                opt.value = values[tabela][j][`id_${tabela}`];
-                opt.text = values[tabela][j][campo];
-
-                if(optControle[values[tabela][j][campo]]) continue;
-
-                select.add(opt, select.options[j]);
-                optControle[values[tabela][j][campo]] = true;
-              }
             
           <?php
             }
@@ -490,34 +528,6 @@
               }
 
               tds += `<td>${concatena}</td>`;
-
-              var formCheck = "<?php echo $relacionamentos[$j]['tabela'] . '-form-checkbox'; ?>";
-              let formCheckbox = document.querySelector(`#${formCheck}`);
-
-              for(let j = 0; j < values[tabela].length; j++){
-                let div = document.createElement('div');
-                div.className = 'form-check form-check-inline';
-
-                let input = document.createElement('input');
-                input.className = 'form-input-check';
-                input.type = 'checkbox';
-                input.id = tabela;
-                input.value = values[tabela][j][`id_${tabela}`];
-
-                let label = document.createElement('label');
-                label.className = 'form-check-label';
-                label.for = tabela;
-                label.innerText = values[tabela][j][campo];
-
-                if(checkControle[values[tabela][j][campo]]) continue;
-
-                checkControle[values[tabela][j][campo]] = true;       
-
-                div.appendChild(input);
-                div.appendChild(label);
-                
-                formCheckbox.appendChild(div);               
-              }
             
           <?php
             }

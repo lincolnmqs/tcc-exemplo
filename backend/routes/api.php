@@ -4,19 +4,30 @@ namespace App\Routes;
 
 use Illuminate\Support\Facades\Route;
 
-///////////////////////////// ALTERAR SOMENTE O CONTEÚDO A BAIXO ////////////////////////////////
+// INÍCIO
 
-// Para criar uma nova rota, é necessário acrescentar no array abaixo o nome referente a tabela.
+// insira no array abaixo o nome referente a tabela
 
 new Rotas([
     // 'nome_da_tabela', 
-    'produtos', 
     'tipo_produtos',
+    'produtos',
     'ingredientes',
     'pessoas'
 ]);
 
-///////////////////////////// ALTERAR SOMENTE O CONTEÚDO A CIMA ////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// FIM
 
 class Rotas {
     public function __construct($rotas){

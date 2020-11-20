@@ -12,7 +12,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Produtos as Model; // 'App\Models\nome_classe'
 
-// 2) Definir um novo nome para o controller abaixo.
+// 2) Definir um novo nome para o controller abaixo
 
 class ProdutosController extends Controller { 
 
@@ -25,7 +25,7 @@ class ProdutosController extends Controller {
 		$this->classe = $classe;
 	}
 
-	// 4) Criar condições de acordo com os métodos relacionados
+	// 4) Criar condições dentro da função abaixo de acordo com os métodos relacionados
 	
 	public function relacionamento($classe, $tabela){
 		if($tabela == 'ingredientes')

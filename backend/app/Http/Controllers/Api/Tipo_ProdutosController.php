@@ -8,12 +8,11 @@ use App\Http\Controllers\Controller;
 
 // INÍCIO
 
-// 1) Para criar um novo controller, inicialmente é necessário alterar o nome da classe abaixo, 
-//referente a model.
+// 1) Alterar o nome da classe abaixo, referente a model
 
 use App\Models\Tipo_Produtos as Model; // 'App\Models\nome_classe'
 
-// 2) Em seguida, é necessário definir um novo nome para o controller abaixo.
+// 2) Definir um novo nome para o controller abaixo
 
 class Tipo_ProdutosController extends Controller { 
 
@@ -26,7 +25,7 @@ class Tipo_ProdutosController extends Controller {
 		$this->classe = $classe;
 	}
 
-	// 4) Criar condições de acordo com os métodos relacionados
+	// 4) Criar condições dentro da função abaixo de acordo com os métodos relacionados
 	
 	public function relacionamento($classe, $tabela){
 		/*

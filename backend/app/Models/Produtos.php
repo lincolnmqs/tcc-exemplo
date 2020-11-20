@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-// 1) Para criar uma nova model, inicialmente é necessário alterar o nome da classe abaixo, 
-//referente a tabela.
+// 1) Alterar o nome da classe abaixo, referente a tabela.
 
 class Produtos extends Model {
 
     public $timestamps = false;
 
-    // 2) Em seguida, é necessário definir os campos da tabela:
+    // 2) Definir os campos da tabela
 
     // nome da tabela
     protected $table = 'produtos';
@@ -26,7 +25,7 @@ class Produtos extends Model {
           'id_tipo_produtos'
     ];
 
-    // relacionamentos
+    // relacionamentos ['nome_da_tabela_1', 'nome_da_tabela_2']
     protected $with = ['ingredientes', 'tipo_produtos'];
 
     public $relacionamentos = [
@@ -42,7 +41,7 @@ class Produtos extends Model {
             'chaveEstrangeira' => 'id_tipo_produtos',
             'chaveLocal'       => 'id_tipo_produtos',
             'tabelaGerada'     => '',
-            'tipo'             => 'pertenceA'
+            'tipo'             => 'muitosParaUm'
         ]
     ];
 
@@ -57,14 +56,27 @@ class Produtos extends Model {
         return $this->relacionamento('tipo_produtos');
     }
 
+    //
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	// FIM
+
     public function relacionamento($tabela){
-        if($this->relacionamentos[$tabela]['tipo'] == 'temUm') // (1-1)
+        if($this->relacionamentos[$tabela]['tipo'] == 'umParaUm') // (1-1)
             return $this->hasOne($this->relacionamentos[$tabela]['classe']);
 
-        else if($this->relacionamentos[$tabela]['tipo'] == 'pertenceA') // (M-1, 1-1)
+        else if($this->relacionamentos[$tabela]['tipo'] == 'muitosParaUm') // (M-1, 1-1)
             return $this->belongsTo($this->relacionamentos[$tabela]['classe'], $this->relacionamentos[$tabela]['chaveEstrangeira'], $this->relacionamentos[$tabela]['chaveLocal']);
 
-        if($this->relacionamentos[$tabela]['tipo'] == 'temMuitos') // (1-M)
+        if($this->relacionamentos[$tabela]['tipo'] == 'umParaMuitos') // (1-M)
             return $this->hasMany($this->relacionamentos[$tabela]['classe'], $this->relacionamentos[$tabela]['chaveEstrangeira']);
 
         else if($this->relacionamentos[$tabela]['tipo'] == 'muitosParaMuitos') // (M-M)
